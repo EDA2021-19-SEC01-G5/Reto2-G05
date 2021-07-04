@@ -1,3 +1,8 @@
+--------
+Req 2: Jose Vicente Vargas Panesso (201815601) jv.vargas@uniandes.edu.co
+Req 3: Daniel Reales (201822265) da.reales@uniandes.edu.co 
+--------
+
 #ISIS1225 - Librerias de soporte
 
 Este proyecto contiene los Tipos abstractos de datos, estructuras de datos y algoritmos requeridos por el curso ISIS1225-Estructuras de Datos y Algoritmos
