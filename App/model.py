@@ -59,43 +59,48 @@ def newCatalog(tipo_lista):
         return None
     catalog = {"videos": None, "categorias": None}
     catalog["videos"] = lt.newList(ED)
+    catalog["categorias"] = lt.newList(ED)
 
     """
     """
-    catalog["videoIds"] = mp.newMap(10000, maptype= 'CHAINING', loadfactor = 4, comparefunction = compareMapBookIds)
-
-
-    """
-    """
-    catalog["categorias"] = mp.newMap(100, maptype = 'PROBING', loadfactor = 0.5, comparefunction = compareByAuthor)
+    catalog["videoIds"] = mp.newMap(10000, maptype= 'CHAINING', loadfactor = 4)
 
 
     """
     """
-    catalog["categorias_id"] = mp.newMap(100, maptype = 'CHAINING', loadfactor = 4.0, comparefunction = cmpTagId)
+    catalog["videos_por_categorias"] = mp.newMap(100, maptype = 'CHAINING', loadfactor = 0.5)
+
+
+    """
+    """
+    catalog["videos_por_categorias_id"] = mp.newMap(100, maptype = 'CHAINING', loadfactor = 4.0)
 
 
     return catalog
 
-def newCategoria(name, id):
-    category = {'name':''
-        'category_id':'',
-        'total_categorias': 0,
-        'videos': None,
-        }
-
-    category['name'] = name
-    category['category_id'] = id
-    category['videos'] = lt.newList()
-    return category
-
 
 def addCategoria(catalog, categoria):
-    new_category = newCategoria(categoria['name'].strip().lower(),categoria['id'].strip())
-    mp.put(catalog['categorias'], categoria['name'],newcategory)
-    mp.put(catalog['categorias_id'], categoria['id'],newcategory)
+    lt.addLast(catalog["categorias"], categoria)
 
+def category_id_name(catalog, category_id):
+    '''
+    Recibe como parámetro el nombre de una
+    categoria y retorna el id correspondiente
+    '''
+    id = None
+    catalog = catalog['categorias']
+    length = lt.size(catalog)
+    i = 1
+    while i <= length:
+        element = lt.getElement(catalog, i)
+        id1 = str(category_id)
+        id2 = str(element['id'])
+        if id1 == id2:
+            id = element['name']
+            break
+        i += 1
 
+    return id
 
 
 def addVideo(catalog, video):
@@ -104,21 +109,19 @@ def addVideo(catalog, video):
     """
     lt.addLast(catalog["videos"], video)
     mp.put(catalog["videoIds"],video['video_id'], video)
+    nombre_categoria = category_id_name(catalog, video["category_id"])
+    if mp.contains(catalog["videos_por_categorias_id"],video["category_id"]):
+        llave_valor = mp.get(catalog["videos_por_categorias_id"], video["category_id"])
+        lista = me.getValue(llave_valor)
+        lt.addLast(lista, video)
+        mp.put(catalog["videos_por_categorias_id"], video["category_id"], lista)
+        mp.put(catalog["videos_por_categorias"], nombre_categoria,lista)
+    else:
+        lista = lt.newList("ARRAY_LIST")
+        lt.addLast(lista, video)
+        mp.put(catalog["videos_por_categorias_id"], video["category_id"], lista)
+        mp.put(catalog["videos_por_categorias"], nombre_categoria,lista)
 
-
-def addVideoCategoria(catalog, categoria):
-    """
-    adiciona a informacion de una categoria
-    """
-    videoid = categoria['video_id'] 
-    categoryid = categoria['category_id']
-    entry = mp.get(catalog['categorias_id'], categoryid)
-    if entry:
-        cat_video = mp.get(catalog['categorias'],me.getValue(entry)['name'])
-        cat_video['value']['total_categorias'] += 1
-        video = mp.get(catalog['videoIds'],videoid)
-        if video: 
-            lt.addLast(cat_video['value']['videos'],video['value'])
 
 # Requerimiento 1
 
@@ -128,7 +131,7 @@ def requerimiento1(catalog,category_name, n):
     categoria determinados
     '''
     lista = getVideosByCategory(catalog, category_name) 
-    organizada = mergesort.sort(lista, cmpByViews)
+    organizada = mergesort.sort(lista, cpmByViews)
     lista_final = lt.newList()
     for j in range(1, n+1):
         if j <= lt.size(organizada):
@@ -138,9 +141,10 @@ def requerimiento1(catalog,category_name, n):
     return lista_final
 
 def getVideosByCategory(catalog, category_name):
-    categories = catalog["categorias"]
+    categories = catalog["videos_por_categorias"]
     entry = mp.get(categories, category_name)
-    return entry['value']['videos']
+    videos = me.getValue(entry)
+    return videos
 
 
 def cpmByViews(elemento1, elemento2):

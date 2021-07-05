@@ -40,8 +40,8 @@ def initcatalog(tipo_lista):
 # Funciones para la carga de datos
 
 def loadData(catalog):
-    loadVideos(catalog)
     loadCategorias(catalog)
+    loadVideos(catalog)
 
 
 def loadVideos(catalog):

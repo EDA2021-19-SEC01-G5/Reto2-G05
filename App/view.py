@@ -29,6 +29,8 @@ import sys
 import controller
 from DISClib.ADT import list as lt
 assert cf
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 
 default_limit = 1000
 sys.setrecursionlimit(default_limit*400000)
@@ -106,19 +108,21 @@ while True:
         else:
             print(
                 "\nNo ingreso una opcion de tipo de dato valida, por favor intente de nuevo.\n")
-    elif int(inputs[0] == 2):
+        print(catalog["categorias"])
+    elif int(inputs[0]) == 2:
         loadData(catalog)
         print("información cargada \n")
         print("Total de registros de videos cargados : ",
                   lt.size(catalog["videos"]), "\n")
-        printCategorias(catalog)
+        #printCategorias(catalog)
         printPrimervideo(catalog)
+        print(catalog["categorias"])
 
     elif int(inputs[0]) == 3:
         n = int(input(
                 "Ingrese el número de videos que desea consultar: "))
         categoria = input("Ingrese la categoria que quiere consultar: ") 
-        requerimiento1(catalog, n, categoria.lower().strip())
+        requerimiento1(catalog, categoria,n)
     else:
         sys.exit(0)
 sys.exit(0)
