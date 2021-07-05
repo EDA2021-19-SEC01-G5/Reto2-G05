@@ -59,6 +59,7 @@ def newCatalog(tipo_lista):
         return None
     catalog = {"videos": None, "categorias": None}
     catalog["videos"] = lt.newList(ED)
+    catalog["categorias"] = lt.newList(ED)
 
     """
     """
@@ -96,7 +97,25 @@ def addCategoria(catalog, categoria):
     mp.put(catalog['categorias'], name ,new_category)
     mp.put(catalog['categorias_id'], id ,new_category)
 
+def category_id_name(catalog, category_id):
+    '''
+    Recibe como parámetro el nombre de una
+    categoria y retorna el id correspondiente
+    '''
+    id = None
+    catalog = catalog['categorias']
+    length = lt.size(catalog)
+    i = 1
+    while i <= length:
+        element = lt.getElement(catalog, i)
+        id1 = str(category_id)
+        id2 = str(element['id'])
+        if id1 == id2:
+            id = element['name']
+            break
+        i += 1
 
+    return id
 
 
 def addVideo(catalog, video):
