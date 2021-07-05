@@ -40,8 +40,8 @@ def initcatalog(tipo_lista):
 # Funciones para la carga de datos
 
 def loadData(catalog):
-    loadVideos(catalog)
     loadCategorias(catalog)
+    loadVideos(catalog)
 
 
 def loadVideos(catalog):
@@ -50,13 +50,13 @@ def loadVideos(catalog):
     for video in input_file:
         model.addVideo(catalog, video)
 
-
 def loadCategorias(catalog):
     direccion = cf.data_dir + "category-id.csv"
     input_file = csv.DictReader(
         open(direccion,  encoding='utf-8'), delimiter="\t")
     for categoria in input_file:
         model.addCategoria(catalog, categoria)
+    
 
 
 # Funciones de ordenamiento

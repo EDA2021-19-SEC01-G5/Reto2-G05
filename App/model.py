@@ -62,28 +62,27 @@ def newCatalog(tipo_lista):
 
     """
     """
-    catalog["videoIds"] = mp.newMap(10000, maptype= 'CHAINING', loadfactor = 4, comparefunction = compareMapBookIds)
+    catalog["videoIds"] = mp.newMap(10000, maptype= 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
 
 
     """
     """
-    catalog["categorias"] = mp.newMap(100, maptype = 'PROBING', loadfactor = 0.5, comparefunction = compareByAuthor)
+    catalog["categorias"] = mp.newMap(100, maptype = 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
 
 
     """
     """
-    catalog["categorias_id"] = mp.newMap(100, maptype = 'CHAINING', loadfactor = 4.0, comparefunction = cmpTagId)
+    catalog["categorias_id"] = mp.newMap(100, maptype = 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
 
 
     return catalog
 
 def newCategoria(name, id):
-    category = {'name':''
-        'category_id':'',
+    category = {'name':'',
+        'category_id': '',
         'total_categorias': 0,
         'videos': None,
         }
-
     category['name'] = name
     category['category_id'] = id
     category['videos'] = lt.newList()
@@ -91,9 +90,11 @@ def newCategoria(name, id):
 
 
 def addCategoria(catalog, categoria):
-    new_category = newCategoria(categoria['name'].strip().lower(),categoria['id'].strip())
-    mp.put(catalog['categorias'], categoria['name'],newcategory)
-    mp.put(catalog['categorias_id'], categoria['id'],newcategory)
+    name = categoria['name'].strip().lower()
+    id = categoria['id'].strip()
+    new_category = newCategoria(name, id)
+    mp.put(catalog['categorias'], name ,new_category)
+    mp.put(catalog['categorias_id'], id ,new_category)
 
 
 
@@ -104,6 +105,8 @@ def addVideo(catalog, video):
     """
     lt.addLast(catalog["videos"], video)
     mp.put(catalog["videoIds"],video['video_id'], video)
+    addVideoCategoria(catalog, video)
+    
 
 
 def addVideoCategoria(catalog, categoria):
@@ -111,7 +114,7 @@ def addVideoCategoria(catalog, categoria):
     adiciona a informacion de una categoria
     """
     videoid = categoria['video_id'] 
-    categoryid = categoria['category_id']
+    categoryid = categoria['category_id'].strip()
     entry = mp.get(catalog['categorias_id'], categoryid)
     if entry:
         cat_video = mp.get(catalog['categorias'],me.getValue(entry)['name'])
@@ -139,11 +142,11 @@ def requerimiento1(catalog,category_name, n):
 
 def getVideosByCategory(catalog, category_name):
     categories = catalog["categorias"]
-    entry = mp.get(categories, category_name)
+    entry = mp.get(categories,category_name.strip())
     return entry['value']['videos']
 
 
-def cpmByViews(elemento1, elemento2):
+def cmpByViews(elemento1, elemento2):
     '''
     Función de comparación de views utilizada
     para ordenar de manera descendente
@@ -416,8 +419,11 @@ def requerimiento4(catalog, country, tag, n):
 
 #Funciones de comparación
 
-def compareByAuthor(element1, element2):
-    pass
+def compareCategorias(categoria, entry):
+    cat_entry = me.getKey(entry)
+    if (categoria.lower().strip() == cat_entry.strip().lower()):
+        return 0
+    
 
 
 def cmpTagId(id1, id2):
