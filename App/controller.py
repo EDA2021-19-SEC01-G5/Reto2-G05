@@ -33,8 +33,8 @@ El controlador se encarga de mediar entre la vista y el modelo.
 # Inicialización del Catálogo de libros
 
 
-def initcatalog(tipo_lista):
-    catalog = model.newCatalog(tipo_lista)
+def initcatalog(tipo_lista,map_type_cat, load_factor_cat):
+    catalog = model.newCatalog(tipo_lista, map_type_cat, load_factor_cat)
     return catalog
 
 

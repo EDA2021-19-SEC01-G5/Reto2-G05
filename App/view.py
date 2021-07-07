@@ -45,11 +45,12 @@ def printMenu():
     print("1- Inicializar Catálogo")
     print("2- Cargar información en el catálogo")
     print("3- Consultar los n videos con más views en una categoria especifica")
+    print("4- Realizar pruebas de rendimiento (tiempo y espacio)")
     print("0- Salir")
 
 
-def initCatalog(tipo_lista):
-    return controller.initcatalog(tipo_lista)
+def initCatalog(tipo_lista,map_type_cat="PROBING", load_factor_cat = 0.5):
+    return controller.initcatalog(tipo_lista, map_type_cat, load_factor_cat)
 
 
 def loadData(catalog):
@@ -124,6 +125,17 @@ while True:
                 "Ingrese el número de videos que desea consultar: "))
         categoria = input("Ingrese la categoria que quiere consultar: ") 
         requerimiento1(catalog, categoria.lower().strip(),n)
+        
+    elif int(inputs[0]) == 4:
+        trials = {"PROBING":[0.30,0.50,0.80], "CHAINING":[2.00,4.00,6.00]}
+        f = open("resultados.csv","w")
+        f.write("tipo, loadfactor, tiempo, espacio\n")
+        for type in trials.keys():
+            for i in range(3):
+                test_catalog = initCatalog(0, type, trials[type][i])
+                test_answer =  loadData(test_catalog)
+                f.write(type + "," + str(trials[type][i]) + "," + str(test_answer[0]) + "," + str(test_answer[1])+ "\n")
+        f.close()
     else:
         sys.exit(0)
 sys.exit(0)

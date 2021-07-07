@@ -47,7 +47,7 @@ los mismos.
 # Funciones para agregar informacion al catalogo
 
 
-def newCatalog(tipo_lista):
+def newCatalog(tipo_lista, map_type_cat="PROBING", load_factor_cat = 0.5):
     """
     Crea el catalogo con la información de videos y de categorias
     """
@@ -59,8 +59,6 @@ def newCatalog(tipo_lista):
         return None
     catalog = {"videos": None, "categorias": None}
     catalog["videos"] = lt.newList(ED)
-    catalog["categorias"] = lt.newList(ED)
-
     """
     """
     catalog["videoIds"] = mp.newMap(10000, maptype= 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
@@ -68,7 +66,7 @@ def newCatalog(tipo_lista):
 
     """
     """
-    catalog["categorias"] = mp.newMap(100, maptype = 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
+    catalog["categorias"] = mp.newMap(100, maptype = map_type_cat, loadfactor = load_factor_cat , comparefunction = compareCategorias)
 
 
     """
