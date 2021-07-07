@@ -53,7 +53,7 @@ def initCatalog(tipo_lista):
 
 
 def loadData(catalog):
-    controller.loadData(catalog)
+    return controller.loadData(catalog)
 
 
 def printCategorias(catalog):
@@ -78,17 +78,19 @@ def printPrimervideo(catalog):
 def requerimiento1(catalog, categoria, n):
     data = controller.requerimiento1(
         catalog,categoria , n )
-    longitud = lt.size(data)
+    longitud = lt.size(data[0])
     if longitud < n:
         print("La cantidad de videos pedidos excede la cantidad posible. \n A continuación de muestran dos los libros de la categoria deseada y el pais deseado, organizados según la cantidad de likes")
     header = ["", "trending date", "titulo", "nombre del canal",
               "fecha publicacion", "vistas", "likes", "dislikes"]
     mostrar = []
-    for i in range(1, longitud+1):
-        elemento = lt.getElement(data, i)
+    for i in range(1, longitud + 1):
+        elemento = lt.getElement(data[0], i)
         mostrar.append([i, elemento["trending_date"], elemento["title"], elemento["channel_title"],
                        elemento["publish_time"], elemento["views"], elemento["likes"], elemento["dislikes"]])
     print(tabulate(mostrar, headers = header))
+    print("Tiempo [ms]: ", f"{data[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ", f"{data[2]:.3f}")
 
 
 """
@@ -108,11 +110,14 @@ while True:
             print(
                 "\nNo ingreso una opcion de tipo de dato valida, por favor intente de nuevo.\n")
     elif int(inputs[0]) == 2:
-        loadData(catalog)
+        answer = loadData(catalog)
         print("información cargada \n")
         print("Total de registros de videos cargados : ",
                   lt.size(catalog["videos"]), "\n")
         printPrimervideo(catalog)
+        print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
+              "Memoria [kB]: ", f"{answer[1]:.3f}")
+
 
     elif int(inputs[0]) == 3:
         n = int(input(
