@@ -84,7 +84,7 @@ def newCategoria(name, id):
         }
     category['name'] = name
     category['category_id'] = id
-    category['videos'] = lt.newList()
+    category['videos'] = lt.newList("ARRAY_LIST")
     return category
 
 
