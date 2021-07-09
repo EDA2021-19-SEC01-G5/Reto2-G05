@@ -61,7 +61,7 @@ def newCatalog(tipo_lista, map_type_cat="PROBING", load_factor_cat = 0.5):
     catalog["videos"] = lt.newList(ED)
     """
     """
-    catalog["videoIds"] = mp.newMap(10000, maptype= 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
+    catalog["videoIds"] = mp.newMap(500000, maptype= map_type_cat, loadfactor = load_factor_cat, comparefunction = compareCategorias)
 
 
     """

@@ -128,7 +128,7 @@ while True:
         
     elif int(inputs[0]) == 4:
         trials = {"PROBING":[0.30,0.50,0.80], "CHAINING":[2.00,4.00,6.00]}
-        f = open("resultados.csv","w")
+        f = open("resultados_cambio5.csv","w")
         f.write("tipo, loadfactor, tiempo, espacio\n")
         for type in trials.keys():
             for i in range(3):
