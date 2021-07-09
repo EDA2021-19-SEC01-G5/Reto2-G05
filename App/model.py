@@ -73,6 +73,8 @@ def newCatalog(tipo_lista, map_type_cat="PROBING", load_factor_cat = 0.5):
     """
     catalog["categorias_id"] = mp.newMap(100, maptype = 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
 
+    catalog["videos_pais"] = mp.newMap(150, maptype = map_type_cat, loadfactor = load_factor_cat)
+
 
     return catalog
 
@@ -123,6 +125,16 @@ def addVideo(catalog, video):
     lt.addLast(catalog["videos"], video)
     mp.put(catalog["videoIds"],video['video_id'], video)
     addVideoCategoria(catalog, video)
+    pais = video["country"]
+    entry = mp.get(catalog["videos_pais"], pais)
+    if entry:
+        videos_pais = me.getValue(entry) 
+        lt.addLast(videos_pais, video)
+    else:
+        videos_pais = lt.newList("ARRAY_LIST")
+        lt.addLast(videos_pais, video)
+        mp.put(catalog["videos_pais"],pais,videos_pais)
+    
     
 
 
@@ -139,6 +151,10 @@ def addVideoCategoria(catalog, categoria):
         video = mp.get(catalog['videoIds'],videoid)
         if video: 
             lt.addLast(cat_video['value']['videos'],video['value'])
+
+def encontrar_lista_pais(catalog, pais):
+    entry = mp.get(catalog["videos_pais"], pais)
+    return me.getValue(entry)
 
 # Requerimiento 1
 
@@ -196,14 +212,27 @@ def dividirPais(catalog, pais):
     Retorna una nueva lista filtrando
     acorde al país ingresado por parámetro
     '''
-    lista = lt.newList("ARRAY_LIST")
-    longitud = lt.size(catalog["videos"])
-    for i in range(1, longitud+1):
-        video = lt.getElement(catalog["videos"], i)
-        if video["country"] == pais:
-            lt.addLast(lista, video)
+    lista = mp.get(catalog["videos_pais"],pais)
+    if lista:
+        lista = me.getValue(lista)
     return lista
 
+def agregarTrending2(lista_videos):
+    videos_map = mp.newMap(50000,maptype="PROBING")
+    cant_videos = lt.size(lista_videos)
+    lista_videos2 = lt.newList("ARRAY_LIST")
+    for i in range(1,cant_videos+1):
+        video = lt.getElement(lista_videos,i)
+        if mp.contains(videos_map, video["title"]):
+            elemento = mp.get(videos_map,video["title"])
+            v2 = me.getValue(elemento)
+            v2["dias_trending"] += 1
+            lt.addLast(lista_videos2,v2)
+        else:
+            video["dias_trending"] = 1
+            mp.put(videos_map,video["title"], video)
+            lt.addLast(lista_videos2, video)
+    return lista_videos2
 
 def agregarTrending(lista_videos):
     '''
@@ -276,7 +305,7 @@ def requerimiento2(catalog, country):
     y acorde a un país determinado.
     '''
     lista_pais = dividirPais(catalog, country)
-    lista_por_titulo = agregarTrending(lista_pais)
+    lista_por_titulo = agregarTrending2(lista_pais)
     nueva_lista = mergesort.sort(lista_por_titulo, comparacionDiasRatioPais)
     elemento = lt.getElement(nueva_lista, 1)
     ratio = str(obtenerRatio(elemento))
@@ -385,6 +414,19 @@ def separarPaisTags(catalog, country, tag):
     return nueva_lista
 
 
+def separarPaisTags2(catalog, country, tag):
+    entry = mp.get(catalog["videos_pais"], country)
+    lista = me.getValue(entry)
+    nueva_lista = lt.newList("ARRAY_LIST")
+    cant_videos = lt.size(lista)
+    for i in range(1, cant_videos+1):
+        video = lt.getElement(lista,i)
+        if tag.lower() in video["tags"].lower().split('"|"'):
+            lt.addLast(nueva_lista, video)
+    return nueva_lista
+
+
+
 def comparacionComentarios(elemento1, elemento2):
     '''
     Función de comparación para ordenar
@@ -420,7 +462,7 @@ def requerimiento4(catalog, country, tag, n):
     Retorna una lista con los n videos con más comentarios según el país
     y el tag especificados por parámetro.
     '''
-    lista_modificada = separarPaisTags(catalog, country, tag)
+    lista_modificada = separarPaisTags2(catalog, country, tag)
     organizada = mergesort.sort(lista_modificada, comparacionComentarios)
     organizada = eliminarRepetidos(organizada)
     entregar = lt.newList("ARRAY_LIST")
