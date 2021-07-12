@@ -22,7 +22,7 @@
  * Contribuciones:
  *
  * Dario Correal - Version inicial
- """
+"""
 
 
 import time
@@ -73,6 +73,8 @@ def newCatalog(tipo_lista, map_type_cat="PROBING", load_factor_cat = 0.5):
     """
     catalog["categorias_id"] = mp.newMap(100, maptype = 'PROBING', loadfactor = 0.5, comparefunction = compareCategorias)
 
+    """
+    """
     catalog["videos_pais"] = mp.newMap(150, maptype = map_type_cat, loadfactor = load_factor_cat)
 
 
@@ -158,39 +160,43 @@ def encontrar_lista_pais(catalog, pais):
 
 # Requerimiento 1
 
-def requerimiento1(catalog,category_name, n):
+def requerimiento1(catalog,category_name, n,country_name):
     '''
     Retorna los n videos con más likes en un país y 
     categoria determinados
     '''
     lista = getVideosByCategory(catalog, category_name) 
-    organizada = mergesort.sort(lista, cmpByViews)
+    filtered_list = filter_by_country(lista,country_name)
+    organizada = mergesort.sort(filtered_list, cmpByLikes)
     lista_final = lt.newList()
-    for j in range(1, n+1):
-        if j <= lt.size(organizada):
-            lt.addLast(lista_final, lt.getElement(organizada, j))
-        else:
-            pass
+    for j in range(n):
+        lt.addLast(lista_final, lt.getElement(organizada,j + 1 ))
     return lista_final
 
 def getVideosByCategory(catalog, category_name):
     categories = catalog["categorias"]
-    entry = mp.get(categories,category_name.strip())
+    entry = mp.get(categories,category_name.strip().lower())
     return entry['value']['videos']
 
+def filter_by_country(lista,country_name):
+    new_list = lt.newList('ARRAY_LIST')
+    for i in range(lt.size(lista)):
+        video = lt.getElement(lista,i + 1)
+        country = video["country"]
+        if country_name.strip().lower() == country.strip().lower():
+            lt.addLast(new_list,video)
+    return new_list
 
-def cmpByViews(elemento1, elemento2):
+def cmpByLikes(elemento1, elemento2):
     '''
     Función de comparación de views utilizada
     para ordenar de manera descendente
     la lista ingresada.
     '''
-    if int(elemento1["views"]) > int(elemento2["views"]):
+    if int(elemento1["likes"]) > int(elemento2["likes"]):
         return True
     else:
         return False
-
-
 
 # requerimiento 2
 
@@ -327,56 +333,13 @@ def requerimiento3(catalog, category_name):
     con más dias trending, cuya relación likes/dislikes es positiva
     y acorde a una categoria determinada.
     '''
-    id = category_name_id(catalog, category_name)
-    filtered_list = filter_by_category_ratio(catalog, id)
-    trending_list = agregarTrending(filtered_list)
+    category_list = getVideosByCategory(catalog,category_name)
+    trending_list = agregarTrending(category_list)
     ordered_trending = mergesort.sort(trending_list, cmp_by_trending)
     top_video = lt.getElement(ordered_trending, lt.size(ordered_trending))
     data = (top_video['title'], top_video['channel_title'],
-            id, obtenerRatio(top_video), top_video['dias_trending'])
+            top_video['category_id'], obtenerRatio(top_video), top_video['dias_trending'])
     return data
-
-
-def category_name_id(catalog, category_name):
-    '''
-    Recibe como parámetro el nombre de una
-    categoria y retorna el id correspondiente
-    '''
-    id = None
-    catalog = catalog['categorias']
-    length = lt.size(catalog)
-    i = 1
-    while i <= length:
-        element = lt.getElement(catalog, i)
-        name1 = category_name.lower().strip()
-        name2 = element['name'].lower().strip()
-        if name1 in name2:
-            id = element['id']
-            break
-        i += 1
-
-    return id
-
-
-def filter_by_category_ratio(catalog, category_id):
-    '''
-    Retorna una nueva lista con los videos que
-    pertenecen a la categoria cuyo id es ingresado por parámetro
-    y cuyo ratio likes/dislikes es altamente positivo.
-    '''
-    new_list = lt.newList('ARRAY_LIST')
-    catalog = catalog['videos']
-    length = lt.size(catalog)
-    i = 1
-    while i <= length:
-        element = lt.getElement(catalog, i)
-        ratio = obtenerRatio(element)
-        if element['category_id'] == category_id and ratio > 20:
-            lt.addLast(new_list, element)
-        i += 1
-
-    return new_list
-
 
 def cmp_by_trending(element1, element2):
     '''
@@ -483,8 +446,6 @@ def compareCategorias(categoria, entry):
     if (categoria.lower().strip() == cat_entry.strip().lower()):
         return 0
     
-
-
 def cmpTagId(id1, id2):
     pass
 

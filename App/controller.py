@@ -82,7 +82,7 @@ def loadCategorias(catalog):
 
 
 # Funciones de consulta sobre el catálogo
-def requerimiento1(catalog,categoria,n):
+def requerimiento1(catalog,categoria,n,country_name):
     data = None
     delta_time = -1.0
     delta_memory = -1.0
@@ -92,7 +92,7 @@ def requerimiento1(catalog,categoria,n):
     start_memory = getMemory()
 
     data = model.requerimiento1(
-        catalog,categoria , n)
+        catalog,categoria , n,country_name)
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -105,18 +105,68 @@ def requerimiento1(catalog,categoria,n):
 
 
 def requerimiento2(catalog, country):
+    datos = None
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     datos = model.requerimiento2(catalog, country)
-    return datos
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return datos, delta_time, delta_memory
 
 
 def requerimiento3(catalog, category_name):
+    datos = None
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     datos = model.requerimiento3(catalog, category_name)
-    return datos
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return datos, delta_time, delta_memory
+
 
 
 def requerimiento4(catalog, country, tag, n):
+    lista = None
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     lista = model.requerimiento4(catalog, country, tag, n)
-    return lista
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return lista, delta_time, delta_memory
+
 
 # ======================================
 # Funciones para medir tiempo y memoria

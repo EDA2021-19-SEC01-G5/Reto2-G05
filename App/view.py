@@ -45,8 +45,9 @@ def printMenu():
     print("Bienvenido")
     print("1- Inicializar Catálogo")
     print("2- Cargar información en el catálogo")
-    print("3- Consultar los n videos con más views en una categoria especifica")
+    print("3- Consultar los n videos con más views en una categoria y país especificos")
     print("4- Consultar el video con mas dias de trending en un pais especifico.")
+    print("5- Consultar el video que más ha sido trending para una categoría y percepción positiva.")
     print("6- Consultar los n videos con mas comentarios para un pais y tag especifico.")
     print("7- Realizar pruebas de rendimiento (tiempo y espacio)")
     print("0- Salir")
@@ -81,9 +82,9 @@ def printPrimervideo(catalog):
     print(elemento.keys())
 
 
-def requerimiento1(catalog, categoria, n):
+def requerimiento1(catalog, categoria, n, country_name):
     data = controller.requerimiento1(
-        catalog,categoria , n )
+        catalog,categoria , n,country_name)
     longitud = lt.size(data[0])
     if longitud < n:
         print("La cantidad de videos pedidos excede la cantidad posible. \n A continuación de muestran dos los libros de la categoria deseada y el pais deseado, organizados según la cantidad de likes")
@@ -103,30 +104,54 @@ def requerimiento2(catalog, country):
     datos = controller.requerimiento2(catalog, country)
     header = ["\nTitulo: ", "Nombre del canal: ",
               "Pais: ", "ratio_likes_dislikes: ", "Dias: "]
-    longitud = lt.size(datos)
+    longitud = lt.size(datos[0])
     if longitud != 5:
         print("No se entro un nombre de pais valido o dentro de los datos")
     else:
-        for i in range(1, longitud+1):
-            print(header[i-1], lt.getElement(datos, i))
+        for i in range(1, longitud + 1):
+            print(header[i-1], lt.getElement(datos[0], i))
     print("\n")
+    print("Tiempo [ms]: ", f"{datos[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ", f"{datos[2]:.3f}")
+
+
+def requerimiento3(catalog, category_name):
+    print("Encontrando los archivos ... \n")
+    datos = controller.requerimiento3(catalog, category_name)
+    header = ["\nTitulo: ", "Nombre del canal: ",
+            "ID Categoria: ", "ratio_likes_dislikes: ", "Dias: "]
+
+    longitud = len(datos[0])
+    if longitud != 5:
+        print("No se entro un nombre de pais valido o dentro de los datos")
+    else:
+        for i in range(longitud):
+            print(header[i], datos[0][i])
+    print("\n")
+    print("Tiempo [ms]: ", f"{datos[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ", f"{datos[2]:.3f}")
+
 
 
 def requerimiento4(catalog, country, tag, n):
     print("Encontrando los archivos ... \n")
     lista = controller.requerimiento4(catalog, country, tag, n)
-    longitud_lista = lt.size(lista)
+    longitud_lista = lt.size(lista[0])
     if n != longitud_lista:
         print("No fue posible encontrar la cantidad de datos pedidos. \nSe entregan la cantidad maxima posible. \n")
     header = ["title", "channel_title", "publish_time",
               "views", "likes", "dislikes", "comment_count", "tags"]
     datos = []
-    for i in range(1, longitud_lista+1):
+    for i in range(1, longitud_lista + 1):
         datos.append([])
-        video = lt.getElement(lista, i)
+        video = lt.getElement(lista[0], i)
         for j in range(len(header)):
             datos[i-1].append(video[header[j]])
     print(tabulate(datos, headers=header))
+    print("\n")
+    print("Tiempo [ms]: ", f"{lista[1]:.3f}", "  ||  ",
+            "Memoria [kB]: ", f"{lista[2]:.3f}")
+
 
 
 """
@@ -151,7 +176,6 @@ while True:
         print("Total de registros de videos cargados : ",
                   lt.size(catalog["videos"]), "\n")
         printPrimervideo(catalog)
-        printCategorias(catalog)
         print("Tiempo [ms]: ", f"{answer[0]:.3f}", "  ||  ",
               "Memoria [kB]: ", f"{answer[1]:.3f}")
 
@@ -160,21 +184,23 @@ while True:
         n = int(input(
                 "Ingrese el número de videos que desea consultar: "))
         categoria = input("Ingrese la categoria que quiere consultar: ") 
-        requerimiento1(catalog, categoria.lower().strip(),n)
+        pais = input("Ingrese el país sobre el que desea consultar: ")
+        requerimiento1(catalog, categoria.lower().strip(),n, pais.lower().strip())
     elif int(inputs[0]) == 4:
         pais = input("Ingrese el pais del cual desea obtener información: ")
-        inicio = time.time_ns()
         requerimiento2(catalog,pais)
-        final = time.time_ns()
-        print("tiempo: ", final-inicio)
+    
+    elif int(inputs[0]) == 5:
+        category_name = input("Ingrese la categoria de la que desea obtener información: ")    
+        category_name = category_name.strip().lower()
+        requerimiento3(catalog,category_name)
+
     elif int(inputs[0]) == 6:
         pais = input("Ingrese el pais del cual desea obtener información: ")
         tag = input("Ingrese el tag del cual desea obtener la información: ")
         n = int(input("Ingrese la cantidad de elementos que desea observar: "))
-        inicio = time.time_ns()
         requerimiento4(catalog,pais,tag, n)
-        final = time.time_ns()
-        print("tiempo: ", final-inicio)
+
     elif int(inputs[0]) == 7:
         trials = {"PROBING":[0.30,0.50,0.80], "CHAINING":[2.00,4.00,6.00]}
         f = open("resultados_cambio5.csv","w")
